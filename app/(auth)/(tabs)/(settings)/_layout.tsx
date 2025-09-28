@@ -1,0 +1,26 @@
+import { Stack } from "expo-router";
+import { useTranslation } from "react-i18next";
+import { Platform } from "react-native";
+
+export default function SettingsLayout() {
+  const { t } = useTranslation();
+
+  return (
+    <Stack>
+      <Stack.Screen
+        name='index'
+        options={{
+          headerShown: !Platform.isTV,
+          headerTitle: t("home.settings.settings_title"),
+          headerLargeTitle: true,
+          headerBlurEffect: "prominent",
+          headerLargeStyle: {
+            backgroundColor: "black",
+          },
+          headerTransparent: Platform.OS === "ios",
+          headerShadowVisible: false,
+        }}
+      />
+    </Stack>
+  );
+}

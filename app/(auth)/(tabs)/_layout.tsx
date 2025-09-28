@@ -137,6 +137,18 @@ export default function TabLayout() {
                       : { sfSymbol: "list.dash" },
           }}
         />
+        <NativeTabs.Screen
+          name='(settings)'
+          options={{
+            title: t("home.settings.settings_title"),
+            tabBarItemHidden: !Platform.isTV,
+            tabBarIcon:
+              Platform.OS === "android"
+                ? (_e) => require("@/assets/icons/gear.png")
+                : ({ focused }) =>
+                    focused ? { sfSymbol: "gear.fill" } : { sfSymbol: "gear" },
+          }}
+        />
       </NativeTabs>
     </>
   );

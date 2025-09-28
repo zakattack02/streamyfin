@@ -10,7 +10,7 @@ import { t } from "i18next";
 import { orderBy } from "lodash";
 import type React from "react";
 import { useCallback, useMemo, useState } from "react";
-import { Alert, TouchableOpacity, View } from "react-native";
+import { Alert, Platform, TouchableOpacity, View } from "react-native";
 import { HorizontalScroll } from "@/components/common/HorizontalScroll";
 import { Text } from "@/components/common/Text";
 import { Tags } from "@/components/GenreTags";
@@ -193,10 +193,13 @@ const JellyseerrSeasons: React.FC<{
           )
           .map((s) => s.seasonNumber),
       };
-      if (hasAdvancedRequest) {
-        return onAdvancedRequest?.(body);
+      // For TV, bypass advanced request permissions and use default values
+      if (Platform.isTV || !hasAdvancedRequest) {
+        requestMedia(details.name, body, refetch);
+        return;
       }
-      requestMedia(details.name, body, refetch);
+      // For mobile/desktop with advanced permissions, show the modal
+      return onAdvancedRequest?.(body);
     }
   }, [
     jellyseerrApi,
@@ -236,10 +239,17 @@ const JellyseerrSeasons: React.FC<{
           tvdbId: details.externalIds?.tvdbId,
           seasons: [seasonNumber],
         };
-        if (hasAdvancedRequest) {
-          return onAdvancedRequest?.(body);
+        // For TV, bypass advanced request permissions and use default values
+        if (Platform.isTV || !hasAdvancedRequest) {
+          requestMedia(
+            `${details.name}, Season ${seasonNumber}`,
+            body,
+            refetch,
+          );
+          return;
         }
-        requestMedia(`${details.name}, Season ${seasonNumber}`, body, refetch);
+        // For mobile/desktop with advanced permissions, show the modal
+        return onAdvancedRequest?.(body);
       }
     },
     [requestMedia, hasAdvancedRequest, onAdvancedRequest, refetch, details],

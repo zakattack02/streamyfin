@@ -133,12 +133,14 @@ const Page: React.FC = () => {
         ?.map?.((s) => s.seasonNumber),
     };
 
-    if (hasAdvancedRequestPermission) {
-      setRequestBody(body);
+    // For TV, bypass advanced request permissions and use default values
+    if (Platform.isTV || !hasAdvancedRequestPermission) {
+      requestMedia(mediaTitle, body, refetch);
       return;
     }
 
-    requestMedia(mediaTitle, body, refetch);
+    // For mobile/desktop with advanced permissions, show the modal
+    setRequestBody(body);
   }, [details, result, requestMedia, hasAdvancedRequestPermission]);
 
   const isAnime = useMemo(

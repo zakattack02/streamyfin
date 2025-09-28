@@ -1,8 +1,14 @@
 import { useRouter, useSegments } from "expo-router";
 import type React from "react";
 import { type PropsWithChildren, useCallback, useMemo } from "react";
-import { TouchableOpacity, type TouchableOpacityProps } from "react-native";
-import * as ContextMenu from "zeego/context-menu";
+import {
+  Platform,
+  TouchableOpacity,
+  type TouchableOpacityProps,
+} from "react-native";
+
+const ContextMenu = !Platform.isTV ? require("zeego/context-menu") : null;
+
 import { useJellyseerr } from "@/hooks/useJellyseerr";
 import { MediaType } from "@/utils/jellyseerr/server/constants/media";
 import {
@@ -57,31 +63,49 @@ export const TouchableJellyseerrRouter: React.FC<PropsWithChildren<Props>> = ({
       mediaId: result.id,
       mediaType,
     });
-  }, [jellyseerrApi, result]);
+  }, [jellyseerrApi, result, requestMedia, mediaTitle, mediaType]);
+
+  const navigateToJellyseerr = useCallback(() => {
+    if (!result) return;
+
+    router.push({
+      // @ts-expect-error - Dynamic pathname for jellyseerr routing
+      pathname: `/(auth)/(tabs)/${from}/jellyseerr/page`,
+      // @ts-expect-error - Complex object parameters
+      params: {
+        ...result,
+        mediaTitle,
+        releaseYear,
+        canRequest: canRequest.toString(),
+        posterSrc,
+        mediaType,
+      },
+    });
+  }, [
+    router,
+    from,
+    result,
+    mediaTitle,
+    releaseYear,
+    canRequest,
+    posterSrc,
+    mediaType,
+  ]);
+
+  // For TV, use simple TouchableOpacity without context menu
+  if (Platform.isTV) {
+    return (
+      <TouchableOpacity onPress={navigateToJellyseerr} {...props}>
+        {children}
+      </TouchableOpacity>
+    );
+  }
 
   if (from === "(home)" || from === "(search)" || from === "(libraries)")
     return (
       <ContextMenu.Root>
         <ContextMenu.Trigger>
-          <TouchableOpacity
-            onPress={() => {
-              if (!result) return;
-
-              router.push({
-                pathname: `/(auth)/(tabs)/${from}/jellyseerr/page`,
-                // @ts-expect-error
-                params: {
-                  ...result,
-                  mediaTitle,
-                  releaseYear,
-                  canRequest: canRequest.toString(),
-                  posterSrc,
-                  mediaType,
-                },
-              });
-            }}
-            {...props}
-          >
+          <TouchableOpacity onPress={navigateToJellyseerr} {...props}>
             {children}
           </TouchableOpacity>
         </ContextMenu.Trigger>
@@ -124,4 +148,11 @@ export const TouchableJellyseerrRouter: React.FC<PropsWithChildren<Props>> = ({
         </ContextMenu.Content>
       </ContextMenu.Root>
     );
+
+  // Fallback for other routes
+  return (
+    <TouchableOpacity onPress={navigateToJellyseerr} {...props}>
+      {children}
+    </TouchableOpacity>
+  );
 };
