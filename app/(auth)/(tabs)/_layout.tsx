@@ -36,7 +36,7 @@ export default function TabLayout() {
       const hasShownIntro = storage.getBoolean("hasShownIntro");
       if (!hasShownIntro) {
         const timer = setTimeout(() => {
-          router.push("/intro/page");
+          router.push("/(auth)/(tabs)/(home)/intro/page");
         }, 1000);
 
         return () => {
@@ -140,7 +140,7 @@ export default function TabLayout() {
         <NativeTabs.Screen
           name='(settings)'
           options={{
-            title: t("home.settings.settings_title"),
+            title: t("tabs.settings"),
             tabBarItemHidden: !Platform.isTV,
             tabBarIcon:
               Platform.OS === "android"

@@ -10,6 +10,12 @@ export default function SettingsLayout() {
       <Stack.Screen
         name='index'
         options={{
+          headerShown: false, // Hide header for redirect page
+        }}
+      />
+      <Stack.Screen
+        name='settings'
+        options={{
           headerShown: !Platform.isTV,
           headerTitle: t("home.settings.settings_title"),
           headerLargeTitle: true,
