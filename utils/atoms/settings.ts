@@ -6,12 +6,13 @@ import {
   type SortOrder,
   SubtitlePlaybackMode,
 } from "@jellyfin/sdk/lib/generated-client";
-import { atom, useAtom, useAtomValue } from "jotai";
+import { atom, useAtom } from "jotai";
 import { useCallback, useEffect, useMemo } from "react";
 import { Platform } from "react-native";
 import { BITRATES, type Bitrate } from "@/components/BitrateSelector";
 import * as ScreenOrientation from "@/packages/expo-screen-orientation";
-import { apiAtom } from "@/providers/JellyfinProvider";
+// Import moved to avoid circular dependency
+// import { apiAtom } from "@/providers/JellyfinProvider";
 import { writeInfoLog } from "@/utils/log";
 import { storage } from "../mmkv";
 
@@ -279,7 +280,6 @@ export const pluginSettingsAtom = atom<PluginLockableSettings | undefined>(
 );
 
 export const useSettings = () => {
-  const api = useAtomValue(apiAtom);
   const [_settings, setSettings] = useAtom(settingsAtom);
   const [pluginSettings, _setPluginSettings] = useAtom(pluginSettingsAtom);
 
@@ -298,20 +298,24 @@ export const useSettings = () => {
     [_setPluginSettings],
   );
 
-  const refreshStreamyfinPluginSettings = useCallback(async () => {
-    if (!api) {
-      return;
-    }
-    const settings = await api.getStreamyfinPluginConfig().then(
-      ({ data }) => {
-        writeInfoLog("Got plugin settings", data?.settings);
-        return data?.settings;
-      },
-      (_err) => undefined,
-    );
-    setPluginSettings(settings);
-    return settings;
-  }, [api]);
+  // Create a separate function for plugin settings that can accept API externally
+  const refreshStreamyfinPluginSettings = useCallback(
+    async (api?: any) => {
+      if (!api) {
+        return;
+      }
+      const settings = await api.getStreamyfinPluginConfig().then(
+        ({ data }: any) => {
+          writeInfoLog("Got plugin settings", data?.settings);
+          return data?.settings;
+        },
+        (_err: any) => undefined,
+      );
+      setPluginSettings(settings);
+      return settings;
+    },
+    [setPluginSettings],
+  );
 
   const updateSettings = (update: Partial<Settings>) => {
     if (!_settings) {

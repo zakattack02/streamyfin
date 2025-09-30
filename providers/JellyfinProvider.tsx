@@ -157,16 +157,26 @@ export const JellyfinProvider: React.FC<{ children: ReactNode }> = ({
 
   useEffect(() => {
     (async () => {
-      await refreshStreamyfinPluginSettings();
+      if (api) {
+        await refreshStreamyfinPluginSettings(api);
+      }
     })();
-  }, []);
+  }, [api, refreshStreamyfinPluginSettings]);
 
   useEffect(() => {
     store.set(apiAtom, api);
   }, [api]);
 
   useInterval(pollQuickConnect, isPolling ? 1000 : null);
-  useInterval(refreshStreamyfinPluginSettings, 60 * 5 * 1000); // 5 min
+  // Create a function that passes api to refreshStreamyfinPluginSettings
+  useInterval(
+    () => {
+      if (api) {
+        refreshStreamyfinPluginSettings(api);
+      }
+    },
+    60 * 5 * 1000,
+  ); // 5 min
 
   const discoverServers = async (url: string): Promise<Server[]> => {
     const servers =

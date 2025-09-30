@@ -166,7 +166,9 @@ export const HomeIndex = () => {
 
   const refetch = async () => {
     setLoading(true);
-    await refreshStreamyfinPluginSettings();
+    if (api) {
+      await refreshStreamyfinPluginSettings(api);
+    }
     await invalidateCache();
     setLoading(false);
   };
